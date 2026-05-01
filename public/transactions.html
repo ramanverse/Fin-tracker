@@ -108,18 +108,19 @@
         const tbody = document.querySelector('#transactions-table tbody');
         tbody.innerHTML = '';
         data.data.forEach(tx => {
-          const isRefund = tx.is_refund;
-          const amtColor = isRefund ? 'text-success' : ''; // simple styling
+          const isIncome = tx.category_type === 'income';
+          const amtColor = isIncome ? 'text-success' : '';
+          const prefix = isIncome ? '+' : '';
           
           tbody.innerHTML += `
             <tr>
               <td>${new Date(tx.date).toLocaleDateString()}</td>
               <td>${tx.description || '-'} ${tx.receipt_url ? '<a href="'+tx.receipt_url+'" target="_blank">[Receipt]</a>' : ''}</td>
-              <td>${tx.category_id}</td>
-              <td class="${amtColor}">${tx.amount}</td>
+              <td>${tx.category_name || 'Uncategorized'}</td>
+              <td class="${amtColor}">${prefix}${tx.amount}</td>
               <td>${tx.currency}</td>
               <td>
-                <button class="btn-outline" style="padding: 0.2rem 0.5rem; border: none; color: var(--danger);" onclick="deleteTx(${tx.id})">Del</button>
+                <button class="btn-outline" style="padding: 0.2rem 0.5rem; border: none; color: var(--danger); cursor: pointer;" onclick="deleteTx(${tx.id})">Del</button>
               </td>
             </tr>
           `;
@@ -133,7 +134,10 @@
     };
 
     const openModal = () => document.getElementById('tx-modal').classList.add('active');
-    const closeModal = () => document.getElementById('tx-modal').classList.remove('active');
+    const closeModal = () => {
+      document.getElementById('tx-modal').classList.remove('active');
+      document.getElementById('tx-form').reset();
+    };
 
     document.getElementById('tx-form').addEventListener('submit', async (e) => {
       e.preventDefault();

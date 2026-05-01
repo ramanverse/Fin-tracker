@@ -1,7 +1,13 @@
 const db = require('../config/db');
 
 const getTransactions = async (userId) => {
-  const result = await db.query('SELECT * FROM transactions WHERE user_id = $1 ORDER BY date DESC', [userId]);
+  const result = await db.query(
+    `SELECT t.*, c.name as category_name, c.type as category_type 
+     FROM transactions t 
+     LEFT JOIN categories c ON t.category_id = c.id 
+     WHERE t.user_id = $1 ORDER BY t.date DESC`, 
+    [userId]
+  );
   return result.rows;
 };
 
