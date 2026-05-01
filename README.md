@@ -2,6 +2,8 @@
 
 A web application to track your personal finances, including income, expenses, and budgets.
 
+🚀 **Live Deployment:** [View on Render](https://your-render-url-here.onrender.com)
+
 ## Features
 - User Authentication (Local & Google OAuth)
 - Track Income and Expenses
@@ -9,6 +11,9 @@ A web application to track your personal finances, including income, expenses, a
 - Category and Budget Management
 - Notifications for Budget Overruns
 - Dashboard with Visualizations
+- **AI Bank Statement Import** (PDF/CSV parsing via OpenAI auto-categorization)
+- **AI Anomaly Detection** (Identifies unusual spending habits using LLMs)
+- Duplicate Transaction Detection
 
 ## Prerequisites
 - Node.js (v18+)
