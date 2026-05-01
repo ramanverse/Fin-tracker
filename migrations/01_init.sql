@@ -27,9 +27,14 @@ CREATE TABLE IF NOT EXISTS transactions (
     description TEXT,
     date DATE NOT NULL,
     receipt_url TEXT,
+    is_refund BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Safe migration: add is_refund if it doesn't exist (for existing databases)
+ALTER TABLE transactions ADD COLUMN IF NOT EXISTS is_refund BOOLEAN DEFAULT FALSE;
+
 
 CREATE TABLE IF NOT EXISTS budgets (
     id SERIAL PRIMARY KEY,
