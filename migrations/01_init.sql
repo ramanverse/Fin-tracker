@@ -8,7 +8,10 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TYPE category_type AS ENUM ('income', 'expense');
+DO $$ BEGIN
+  CREATE TYPE category_type AS ENUM ('income', 'expense');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 CREATE TABLE IF NOT EXISTS categories (
     id SERIAL PRIMARY KEY,
