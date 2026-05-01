@@ -133,8 +133,8 @@
       if(data.success) categoriesCache = data.data;
     };
 
-    const openModal = () => document.getElementById('tx-modal').classList.add('active');
-    const closeModal = () => {
+    window.openModal = () => document.getElementById('tx-modal').classList.add('active');
+    window.closeModal = () => {
       document.getElementById('tx-modal').classList.remove('active');
       document.getElementById('tx-form').reset();
     };
@@ -177,14 +177,14 @@
       loadTransactions();
     });
 
-    const deleteTx = async (id) => {
+    window.deleteTx = async (id) => {
       if(confirm('Are you sure?')) {
         await apiFetch(`/transactions/${id}`, { method: 'DELETE' });
         loadTransactions();
       }
     };
 
-    const detectAnomalies = async () => {
+    window.detectAnomalies = async () => {
       alert('Analyzing transactions with OpenAI...');
       const data = await apiFetch('/insights/anomalies');
       if (data.success && data.anomalies) {
@@ -199,7 +199,7 @@
       }
     };
 
-    const importStatement = async (input) => {
+    window.importStatement = async (input) => {
       const file = input.files[0];
       if (!file) return;
 
