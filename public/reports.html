@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reports - Finance Tracker</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <nav>
+    <h2 class="gradient-text" style="margin:0;">Finance Tracker</h2>
+    <div class="nav-links">
+      <a href="/dashboard.html">Dashboard</a>
+      <a href="/transactions.html">Transactions</a>
+      <a href="/budgets.html">Budgets</a>
+      <a href="/reports.html" class="active">Reports</a>
+      <a href="#" id="logout-btn">Logout</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <h1 style="margin-bottom: 2rem;">Monthly Reports</h1>
+    
+    <div class="glass-panel" style="margin-bottom: 2rem;">
+      <form id="report-form" style="display: flex; gap: 1rem; align-items: flex-end;">
+        <div class="form-group" style="margin: 0;">
+          <label>Month</label>
+          <input type="number" id="month" class="form-control" min="1" max="12" required>
+        </div>
+        <div class="form-group" style="margin: 0;">
+          <label>Year</label>
+          <input type="number" id="year" class="form-control" min="2000" required>
+        </div>
+        <div class="form-group" style="margin: 0;">
+          <label>Currency Code</label>
+          <input type="text" id="currency" class="form-control" value="USD" required>
+        </div>
+        <button type="submit" class="btn">Generate Report</button>
+        <button type="button" class="btn btn-outline" id="download-csv">Download CSV</button>
+      </form>
+    </div>
+
+    <div class="grid" id="report-results" style="display: none;">
+      <div class="glass-panel">
+        <h3 class="text-success">Total Income</h3>
+        <h2 id="r-income">$0.00</h2>
+      </div>
+      <div class="glass-panel">
+        <h3 class="text-danger">Total Expense</h3>
+        <h2 id="r-expense">$0.00</h2>
+      </div>
+      <div class="glass-panel">
+        <h3 class="gradient-text">Net Savings</h3>
+        <h2 id="r-net">$0.00</h2>
+      </div>
+    </div>
+    
+    <div class="glass-panel" id="report-breakdown" style="display: none; margin-top: 2rem;">
+      <h3>Top Expenses</h3>
+      <table id="top-expenses-table">
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th>Total Amount</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="/js/main.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const isAuth = await checkAuth();
+      if (!isAuth) return;
+      
+      const d = new Date();
+      document.getElementById('month').value = d.getMonth() + 1;
+      document.getElementById('year').value = d.getFullYear();
+    });
+
+    const buildUrl = (format = '') => {
+      const month = document.getElementById('month').value;
+      const year = document.getElementById('year').value;
+      const currency = document.getElementById('currency').value;
+      let url = `/reports?type=monthly&month=\${month}&year=\${year}&currency=\${currency}`;
+      if (format) url += `&format=\${format}`;
+      return url;
+    };
+
+    document.getElementById('report-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const data = await apiFetch(buildUrl());
+      if (data.success) {
+        document.getElementById('report-results').style.display = 'grid';
+        document.getElementById('report-breakdown').style.display = 'block';
+        
+        const currency = document.getElementById('currency').value;
+        
+        document.getElementById('r-income').textContent = `\${currency} \${data.data.income.toFixed(2)}`;
+        document.getElementById('r-expense').textContent = `\${currency} \${data.data.expense.toFixed(2)}`;
+        document.getElementById('r-net').textContent = `\${currency} \${data.data.net.toFixed(2)}`;
+        
+        const tbody = document.querySelector('#top-expenses-table tbody');
+        tbody.innerHTML = '';
+        data.data.topCategories.forEach(c => {
+          tbody.innerHTML += `<tr><td>\${c.name}</td><td>\${currency} \${parseFloat(c.total).toFixed(2)}</td></tr>`;
+        });
+      }
+    });
+
+    document.getElementById('download-csv').addEventListener('click', () => {
+      const token = getToken();
+      const url = `/api\${buildUrl('csv')}`;
+      
+      fetch(url, { headers: { 'Authorization': `Bearer \${token}` } })
+        .then(res => res.blob())
+        .then(blob => {
+          const a = document.createElement('a');
+          a.href = window.URL.createObjectURL(blob);
+          a.download = `report-\${document.getElementById('month').value}-\${document.getElementById('year').value}.csv`;
+          a.click();
+        });
+    });
+  </script>
+</body>
+</html>

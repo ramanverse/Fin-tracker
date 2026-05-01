@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Budgets - Finance Tracker</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <nav>
+    <h2 class="gradient-text" style="margin:0;">Finance Tracker</h2>
+    <div class="nav-links">
+      <a href="/dashboard.html">Dashboard</a>
+      <a href="/transactions.html">Transactions</a>
+      <a href="/budgets.html" class="active">Budgets</a>
+      <a href="/reports.html">Reports</a>
+      <a href="#" id="logout-btn">Logout</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+      <h1>Budget Utilization</h1>
+      <button class="btn" onclick="openModal()">+ Set Budget</button>
+    </div>
+    
+    <div class="grid" id="budgets-grid">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+
+  <div class="modal" id="budget-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center;">
+    <div class="glass-panel" style="max-width: 400px; width: 100%;">
+      <h2>Set Budget</h2>
+      <form id="budget-form">
+        <div class="form-group">
+          <label>Category ID (For MVP)</label>
+          <input type="number" id="category_id" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label>Limit Amount</label>
+          <input type="number" id="limit_amount" class="form-control" step="0.01" required>
+        </div>
+        <div class="form-group" style="display:flex; gap:1rem;">
+          <div style="flex:1;">
+            <label>Month</label>
+            <input type="number" id="month" class="form-control" min="1" max="12" required>
+          </div>
+          <div style="flex:1;">
+            <label>Year</label>
+            <input type="number" id="year" class="form-control" min="2000" required>
+          </div>
+        </div>
+        <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+          <button type="submit" class="btn" style="flex:1;">Save</button>
+          <button type="button" class="btn btn-outline" style="flex:1;" onclick="closeModal()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/main.js"></script>
+  <script>
+    const loadBudgets = async () => {
+      const today = new Date();
+      const month = today.getMonth() + 1;
+      const year = today.getFullYear();
+      
+      const data = await apiFetch(`/budgets?month=\${month}&year=\${year}`);
+      if (data.success) {
+        const grid = document.getElementById('budgets-grid');
+        grid.innerHTML = '';
+        
+        data.data.forEach(b => {
+          const pct = Math.min(b.percentage_used || 0, 100);
+          const exceeded = pct >= 100 ? 'exceeded' : '';
+          
+          grid.innerHTML += `
+            <div class="glass-panel">
+              <h3 style="display:flex; justify-content: space-between;">
+                <span>Cat ID: \${b.category_id}</span>
+                <span class="\${pct >= 100 ? 'text-danger' : ''}">\${pct.toFixed(1)}%</span>
+              </h3>
+              <p style="color: var(--text-muted); margin-bottom: 0.5rem;">
+                $\${parseFloat(b.total_spent || 0).toFixed(2)} of $\${parseFloat(b.limit_amount).toFixed(2)}
+              </p>
+              <div class="progress-bg">
+                <div class="progress-fill \${exceeded}" style="width: \${pct}%"></div>
+              </div>
+            </div>
+          `;
+        });
+      }
+    };
+
+    const openModal = () => document.getElementById('budget-modal').style.display = 'flex';
+    const closeModal = () => document.getElementById('budget-modal').style.display = 'none';
+
+    document.getElementById('budget-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const body = {
+        category_id: document.getElementById('category_id').value,
+        limit_amount: document.getElementById('limit_amount').value,
+        month: document.getElementById('month').value,
+        year: document.getElementById('year').value
+      };
+
+      await apiFetch('/budgets', {
+        method: 'POST',
+        body: JSON.stringify(body)
+      });
+
+      closeModal();
+      loadBudgets();
+    });
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const isAuth = await checkAuth();
+      if (!isAuth) return;
+      
+      const d = new Date();
+      document.getElementById('month').value = d.getMonth() + 1;
+      document.getElementById('year').value = d.getFullYear();
+      
+      loadBudgets();
+    });
+  </script>
+</body>
+</html>
