@@ -2,7 +2,7 @@
 
 A web application to track your personal finances, including income, expenses, and budgets.
 
-🚀 **Live Deployment:** [View on Render](https://your-render-url-here.onrender.com)
+🚀 **Live Deployment:** [View on Render](https://fin-tracker-8bi4.onrender.com)
 
 ## Features
 - User Authentication (Local & Google OAuth)
