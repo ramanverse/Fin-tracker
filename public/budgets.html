@@ -67,7 +67,7 @@
       const month = today.getMonth() + 1;
       const year = today.getFullYear();
       
-      const data = await apiFetch(`/budgets?month=\${month}&year=\${year}`);
+      const data = await apiFetch(`/budgets?month=${month}&year=${year}`);
       if (data.success) {
         const grid = document.getElementById('budgets-grid');
         grid.innerHTML = '';
@@ -79,14 +79,14 @@
           grid.innerHTML += `
             <div class="glass-panel">
               <h3 style="display:flex; justify-content: space-between;">
-                <span>Cat ID: \${b.category_id}</span>
-                <span class="\${pct >= 100 ? 'text-danger' : ''}">\${pct.toFixed(1)}%</span>
+                <span>Cat ID: ${b.category_id}</span>
+                <span class="${pct >= 100 ? 'text-danger' : ''}">${pct.toFixed(1)}%</span>
               </h3>
               <p style="color: var(--text-muted); margin-bottom: 0.5rem;">
-                $\${parseFloat(b.total_spent || 0).toFixed(2)} of $\${parseFloat(b.limit_amount).toFixed(2)}
+                $${parseFloat(b.total_spent || 0).toFixed(2)} of $${parseFloat(b.limit_amount).toFixed(2)}
               </p>
               <div class="progress-bg">
-                <div class="progress-fill \${exceeded}" style="width: \${pct}%"></div>
+                <div class="progress-fill ${exceeded}" style="width: ${pct}%"></div>
               </div>
             </div>
           `;

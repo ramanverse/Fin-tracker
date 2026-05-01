@@ -37,8 +37,8 @@ const checkAuth = async () => {
 
   // Validate token
   try {
-    const res = await fetch(`\${API_URL}/users/profile`, {
-      headers: { 'Authorization': `Bearer \${token}` }
+    const res = await fetch(`${API_URL}/users/profile`, {
+      headers: { 'Authorization': `Bearer ${token}` }
     });
     const data = await res.json();
     if (!data.success) throw new Error('Invalid token');
@@ -58,7 +58,7 @@ const checkAuth = async () => {
 const apiFetch = async (endpoint, options = {}) => {
   const token = getToken();
   const headers = {
-    'Authorization': `Bearer \${token}`,
+    'Authorization': `Bearer ${token}`,
     ...options.headers
   };
   
@@ -69,7 +69,7 @@ const apiFetch = async (endpoint, options = {}) => {
     delete headers['Content-Type'];
   }
 
-  const res = await fetch(`\${API_URL}\${endpoint}`, { ...options, headers });
+  const res = await fetch(`${API_URL}${endpoint}`, { ...options, headers });
   return await res.json();
 };
 

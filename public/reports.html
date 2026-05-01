@@ -85,8 +85,8 @@
       const month = document.getElementById('month').value;
       const year = document.getElementById('year').value;
       const currency = document.getElementById('currency').value;
-      let url = `/reports?type=monthly&month=\${month}&year=\${year}&currency=\${currency}`;
-      if (format) url += `&format=\${format}`;
+      let url = `/reports?type=monthly&month=${month}&year=${year}&currency=${currency}`;
+      if (format) url += `&format=${format}`;
       return url;
     };
 
@@ -100,28 +100,28 @@
         
         const currency = document.getElementById('currency').value;
         
-        document.getElementById('r-income').textContent = `\${currency} \${data.data.income.toFixed(2)}`;
-        document.getElementById('r-expense').textContent = `\${currency} \${data.data.expense.toFixed(2)}`;
-        document.getElementById('r-net').textContent = `\${currency} \${data.data.net.toFixed(2)}`;
+        document.getElementById('r-income').textContent = `${currency} ${data.data.income.toFixed(2)}`;
+        document.getElementById('r-expense').textContent = `${currency} ${data.data.expense.toFixed(2)}`;
+        document.getElementById('r-net').textContent = `${currency} ${data.data.net.toFixed(2)}`;
         
         const tbody = document.querySelector('#top-expenses-table tbody');
         tbody.innerHTML = '';
         data.data.topCategories.forEach(c => {
-          tbody.innerHTML += `<tr><td>\${c.name}</td><td>\${currency} \${parseFloat(c.total).toFixed(2)}</td></tr>`;
+          tbody.innerHTML += `<tr><td>${c.name}</td><td>${currency} ${parseFloat(c.total).toFixed(2)}</td></tr>`;
         });
       }
     });
 
     document.getElementById('download-csv').addEventListener('click', () => {
       const token = getToken();
-      const url = `/api\${buildUrl('csv')}`;
+      const url = `/api${buildUrl('csv')}`;
       
-      fetch(url, { headers: { 'Authorization': `Bearer \${token}` } })
+      fetch(url, { headers: { 'Authorization': `Bearer ${token}` } })
         .then(res => res.blob())
         .then(blob => {
           const a = document.createElement('a');
           a.href = window.URL.createObjectURL(blob);
-          a.download = `report-\${document.getElementById('month').value}-\${document.getElementById('year').value}.csv`;
+          a.download = `report-${document.getElementById('month').value}-${document.getElementById('year').value}.csv`;
           a.click();
         });
     });

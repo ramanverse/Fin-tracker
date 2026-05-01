@@ -26,9 +26,14 @@
   </nav>
 
   <div class="container">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; gap: 1rem; flex-wrap: wrap;">
       <h1>Transactions</h1>
-      <button class="btn" onclick="openModal()">+ Add Transaction</button>
+      <div style="display: flex; gap: 1rem;">
+        <button class="btn btn-outline" onclick="detectAnomalies()">🔍 AI Anomaly Detection</button>
+        <button class="btn btn-outline" onclick="document.getElementById('import-input').click()">📄 Import Statement</button>
+        <button class="btn" onclick="openModal()">+ Add Transaction</button>
+      </div>
+      <input type="file" id="import-input" style="display: none;" onchange="importStatement(this)">
     </div>
     
     <div class="glass-panel">
@@ -101,13 +106,13 @@
           
           tbody.innerHTML += `
             <tr>
-              <td>\${new Date(tx.date).toLocaleDateString()}</td>
-              <td>\${tx.description || '-'} \${tx.receipt_url ? '<a href="'+tx.receipt_url+'" target="_blank">[Receipt]</a>' : ''}</td>
-              <td>\${tx.category_id}</td>
-              <td class="\${amtColor}">\${tx.amount}</td>
-              <td>\${tx.currency}</td>
+              <td>${new Date(tx.date).toLocaleDateString()}</td>
+              <td>${tx.description || '-'} ${tx.receipt_url ? '<a href="'+tx.receipt_url+'" target="_blank">[Receipt]</a>' : ''}</td>
+              <td>${tx.category_id}</td>
+              <td class="${amtColor}">${tx.amount}</td>
+              <td>${tx.currency}</td>
               <td>
-                <button class="btn-outline" style="padding: 0.2rem 0.5rem; border: none; color: var(--danger);" onclick="deleteTx(\${tx.id})">Del</button>
+                <button class="btn-outline" style="padding: 0.2rem 0.5rem; border: none; color: var(--danger);" onclick="deleteTx(${tx.id})">Del</button>
               </td>
             </tr>
           `;
@@ -153,7 +158,7 @@
       const token = getToken();
       await fetch('/api/transactions', {
         method: 'POST',
-        headers: { 'Authorization': `Bearer \${token}` },
+        headers: { 'Authorization': `Bearer ${token}` },
         body: formData
       });
 
@@ -163,9 +168,49 @@
 
     const deleteTx = async (id) => {
       if(confirm('Are you sure?')) {
-        await apiFetch(`/transactions/\${id}`, { method: 'DELETE' });
+        await apiFetch(`/transactions/${id}`, { method: 'DELETE' });
         loadTransactions();
       }
+    };
+
+    const detectAnomalies = async () => {
+      alert('Analyzing transactions with OpenAI...');
+      const data = await apiFetch('/insights/anomalies');
+      if (data.success && data.anomalies) {
+        if (data.anomalies.length === 0) {
+          alert('No anomalies detected. Your spending looks normal!');
+        } else {
+          const report = data.anomalies.map(a => `[${a.severity}] ${a.description} (${a.justification})`).join('\n\n');
+          alert('AI Anomaly Report:\n\n' + report);
+        }
+      } else {
+        alert('Failed to detect anomalies: ' + (data.error || 'Unknown error'));
+      }
+    };
+
+    const importStatement = async (input) => {
+      const file = input.files[0];
+      if (!file) return;
+
+      const formData = new FormData();
+      formData.append('statement', file);
+
+      alert('Uploading statement for AI categorization...');
+      const token = getToken();
+      const res = await fetch('/api/transactions/import', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        alert(`Successfully imported ${data.count} transactions!`);
+        loadTransactions();
+      } else {
+        alert('Import failed: ' + (data.error || 'Check console'));
+      }
+      input.value = ''; // Reset file input
     };
 
     document.addEventListener('DOMContentLoaded', async () => {

@@ -8,7 +8,8 @@ require('dotenv').config();
 const app = express();
 
 // Security Middleware
-app.use(helmet());
+// Security Middleware - Disabled for local testing to avoid CSP issues with inline scripts
+// app.use(helmet());
 
 // CORS Middleware
 app.use(cors());

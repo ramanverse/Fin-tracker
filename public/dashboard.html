@@ -59,13 +59,13 @@
       const data = await apiFetch('/dashboard');
       if (data.success) {
         const stats = data.data.currentMonth;
-        document.getElementById('total-income').textContent = `$\${stats.income.toFixed(2)}`;
-        document.getElementById('total-expense').textContent = `$\${stats.expenses.toFixed(2)}`;
-        document.getElementById('net-savings').textContent = `$\${stats.netSavings.toFixed(2)}`;
+        document.getElementById('total-income').textContent = `$${stats.income.toFixed(2)}`;
+        document.getElementById('total-expense').textContent = `$${stats.expenses.toFixed(2)}`;
+        document.getElementById('net-savings').textContent = `$${stats.netSavings.toFixed(2)}`;
 
         // Render Trend Chart
         const ctxTrend = document.getElementById('trendChart').getContext('2d');
-        const labels = data.data.monthlyTrend.map(t => `\${t.year}-\${t.month}`);
+        const labels = data.data.monthlyTrend.map(t => `${t.year}-${t.month}`);
         const incomeData = data.data.monthlyTrend.map(t => parseFloat(t.income));
         const expenseData = data.data.monthlyTrend.map(t => parseFloat(t.expense));
 
