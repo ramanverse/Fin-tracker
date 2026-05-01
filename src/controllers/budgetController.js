@@ -17,7 +17,7 @@ const getBudgets = async (req, res) => {
     const budgetsWithSpending = await Promise.all(result.rows.map(async (b) => {
       const spendingResult = await db.query(
         `SELECT COALESCE(SUM(amount), 0) as total FROM transactions 
-         WHERE user_id = $1 AND category_id = $2 AND EXTRACT(MONTH FROM date) = $3 AND EXTRACT(YEAR FROM date) = $4 AND is_refund = FALSE`,
+         WHERE user_id = $1 AND category_id = $2 AND EXTRACT(MONTH FROM date) = $3 AND EXTRACT(YEAR FROM date) = $4 AND amount >= 0`,
         [req.user.id, b.category_id, b.month, b.year]
       );
       

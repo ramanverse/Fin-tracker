@@ -18,7 +18,7 @@ const getReports = async (req, res) => {
           SUM(CASE WHEN c.type = 'expense' THEN t.amount ELSE 0 END) as total_expense
        FROM transactions t
        JOIN categories c ON t.category_id = c.id
-       WHERE t.user_id = $1 AND EXTRACT(MONTH FROM t.date) = $2 AND EXTRACT(YEAR FROM t.date) = $3 AND t.is_refund = FALSE`,
+       WHERE t.user_id = $1 AND EXTRACT(MONTH FROM t.date) = $2 AND EXTRACT(YEAR FROM t.date) = $3 AND t.amount >= 0`,
       [userId, month, year]
     );
 
@@ -30,7 +30,7 @@ const getReports = async (req, res) => {
       `SELECT c.name, SUM(t.amount) as total
        FROM transactions t
        JOIN categories c ON t.category_id = c.id
-       WHERE t.user_id = $1 AND c.type = 'expense' AND EXTRACT(MONTH FROM t.date) = $2 AND EXTRACT(YEAR FROM t.date) = $3 AND t.is_refund = FALSE
+       WHERE t.user_id = $1 AND c.type = 'expense' AND EXTRACT(MONTH FROM t.date) = $2 AND EXTRACT(YEAR FROM t.date) = $3 AND t.amount >= 0
        GROUP BY c.id, c.name
        ORDER BY total DESC`,
       [userId, month, year]
@@ -70,19 +70,19 @@ const getReports = async (req, res) => {
       
       const csvLines = [];
       csvLines.push('Type,Amount');
-      csvLines.push(`Income,\${reportData.income}`);
-      csvLines.push(`Expense,\${reportData.expense}`);
-      csvLines.push(`Net,\${reportData.net}`);
+      csvLines.push(`Income,${reportData.income}`);
+      csvLines.push(`Expense,${reportData.expense}`);
+      csvLines.push(`Net,${reportData.net}`);
       csvLines.push('');
       csvLines.push('Category,Amount');
       
       reportData.categoryBreakdown.forEach(cat => {
-        csvLines.push(`\${cat.name},\${cat.total}`);
+        csvLines.push(`${cat.name},${cat.total}`);
       });
 
       res.header('Content-Type', 'text/csv');
-      res.attachment(`report-\${year}-\${month}.csv`);
-      return res.send(csvLines.join('\\n'));
+      res.attachment(`report-${year}-${month}.csv`);
+      return res.send(csvLines.join('\n'));
     }
 
     res.json({ success: true, data: reportData });

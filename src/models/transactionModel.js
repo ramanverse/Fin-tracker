@@ -11,7 +11,8 @@ const getTransactionById = async (id, userId) => {
 };
 
 const createTransaction = async (userId, data) => {
-  const { category_id, amount, currency, description, date, receipt_url, is_refund } = data;
+  const { category_id, amount, currency, description, date, receipt_url } = data;
+  const is_refund = parseFloat(amount) < 0; // auto-compute from negative amount
   const result = await db.query(
     `INSERT INTO transactions (user_id, category_id, amount, currency, description, date, receipt_url, is_refund) 
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
@@ -21,7 +22,7 @@ const createTransaction = async (userId, data) => {
 };
 
 const updateTransaction = async (id, userId, data) => {
-  const { category_id, amount, currency, description, date, receipt_url, is_refund } = data;
+  const { category_id, amount, currency, description, date, receipt_url } = data;
   const result = await db.query(
     `UPDATE transactions SET 
        category_id = COALESCE($1, category_id),
@@ -30,10 +31,9 @@ const updateTransaction = async (id, userId, data) => {
        description = COALESCE($4, description),
        date = COALESCE($5, date),
        receipt_url = COALESCE($6, receipt_url),
-       is_refund = COALESCE($7, is_refund),
        updated_at = CURRENT_TIMESTAMP
-     WHERE id = $8 AND user_id = $9 RETURNING *`,
-    [category_id, amount, currency, description, date, receipt_url, is_refund, id, userId]
+     WHERE id = $7 AND user_id = $8 RETURNING *`,
+    [category_id, amount, currency, description, date, receipt_url, id, userId]
   );
   return result.rows[0];
 };

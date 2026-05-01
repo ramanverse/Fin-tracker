@@ -12,7 +12,7 @@ const checkBudgetAndNotify = async (userId, categoryId, date) => {
   
   if (budgetStatus && budgetStatus.isExceeded) {
     const user = await userModel.findById(userId);
-    const message = `Budget exceeded! You have spent \${budgetStatus.totalSpent} which is over your limit of \${budgetStatus.budgetLimit}.`;
+    const message = `Budget exceeded! You have spent ${budgetStatus.totalSpent} which is over your limit of ${budgetStatus.budgetLimit}.`;
     
     await notificationModel.createNotification(userId, message);
     await sendEmail(user.email, 'Budget Exceeded Alert', message);
@@ -41,7 +41,7 @@ const getTransaction = async (req, res) => {
 const createTransaction = async (req, res) => {
   try {
     const { category_id, amount, currency, description, date } = req.body;
-    let receipt_url = req.file ? `/uploads/\${req.file.filename}` : null;
+    let receipt_url = req.file ? `/uploads/${req.file.filename}` : null;
     
     let actualAmount = parseFloat(amount);
     let is_refund = false;
@@ -78,7 +78,7 @@ const createTransaction = async (req, res) => {
 const updateTransaction = async (req, res) => {
   try {
     const { category_id, amount, currency, description, date } = req.body;
-    let receipt_url = req.file ? `/uploads/\${req.file.filename}` : undefined;
+    let receipt_url = req.file ? `/uploads/${req.file.filename}` : undefined;
     
     let is_refund = undefined;
     let actualAmount = undefined;

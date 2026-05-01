@@ -14,7 +14,7 @@ const getDashboardData = async (req, res) => {
           SUM(CASE WHEN c.type = 'expense' THEN t.amount ELSE 0 END) as total_expense
        FROM transactions t
        JOIN categories c ON t.category_id = c.id
-       WHERE t.user_id = $1 AND EXTRACT(MONTH FROM t.date) = $2 AND EXTRACT(YEAR FROM t.date) = $3 AND t.is_refund = FALSE`,
+       WHERE t.user_id = $1 AND EXTRACT(MONTH FROM t.date) = $2 AND EXTRACT(YEAR FROM t.date) = $3 AND t.amount >= 0`,
       [userId, currentMonth, currentYear]
     );
 
@@ -62,7 +62,7 @@ const getDashboardData = async (req, res) => {
           AND t.user_id = b.user_id 
           AND EXTRACT(MONTH FROM t.date) = b.month 
           AND EXTRACT(YEAR FROM t.date) = b.year
-          AND t.is_refund = FALSE
+           AND t.amount >= 0
        WHERE b.user_id = $1 AND b.month = $2 AND b.year = $3
        GROUP BY b.category_id, c.name, b.limit_amount`,
       [userId, currentMonth, currentYear]
